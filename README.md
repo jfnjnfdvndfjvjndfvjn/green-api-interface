@@ -31,15 +31,18 @@ HTML-страница с интеграцией GREEN-API для работы с
    - **sendMessage** / **sendFileByUrl** - откроют дополнительные поля
 
 ### 3. Отправка сообщения
+
 1. в своем примере я использовал: 
+
    /idInstance: 7105473809
+
    /apiTokenInstance: ae812eccabd049d2a6708c0585920074f1b0e4952b344001b9
 ```
 
 
-3. **Ваш сайт будет доступен по адресу:**
+3. **Deploy сайта**
    ```
-   https://ваш-username.github.io/green-api-interface/
+   https://green-api-interface.vercel.app/
    ```
 
 
@@ -87,4 +90,5 @@ POST https://api.green-api.com/waInstance{idInstance}/sendFileByUrl/{apiToken}
 
 
 ---
+
 
