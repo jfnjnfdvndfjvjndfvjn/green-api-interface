@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREEN-API WhatsApp Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .credentials-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .credentials-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #555;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .methods-section {
+            margin-bottom: 30px;
+        }
+
+        .methods-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .method-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .method-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .method-btn:active {
+            transform: translateY(0);
+        }
+
+        .method-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-get-settings {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-get-state {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-send-message {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-send-file {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .message-inputs {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .message-inputs.active {
+            display: block;
+        }
+
+        .response-section {
+            margin-top: 30px;
+        }
+
+        .response-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .response-box {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 150px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response-box:empty::before {
+            content: 'Ответ от API появится здесь...';
+            color: #999;
+            font-style: italic;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 GREEN-API WhatsApp Interface</h1>
+            <p>Тестовое задание - Специалист технической поддержки 2 линии</p>
+        </div>
+
+        <div class="credentials-section">
+            <h2>🔐 Параметры подключения</h2>
+            <div class="input-group">
+                <label for="idInstance">ID Instance:</label>
+                <input type="text" id="idInstance" placeholder="Введите idInstance">
+            </div>
+            <div class="input-group">
+                <label for="apiToken">API Token Instance:</label>
+                <input type="text" id="apiToken" placeholder="Введите ApiTokenInstance">
+            </div>
+        </div>
+
+        <div class="methods-section">
+            <h2>📡 Методы API</h2>
+            <div class="methods-grid">
+                <button class="method-btn btn-get-settings" onclick="getSettings()">
+                    getSettings
+                </button>
+                <button class="method-btn btn-get-state" onclick="getStateInstance()">
+                    getStateInstance
+                </button>
+                <button class="method-btn btn-send-message" onclick="toggleMessageInput()">
+                    sendMessage
+                </button>
+                <button class="method-btn btn-send-file" onclick="toggleFileInput()">
+                    sendFileByUrl
+                </button>
+            </div>
+
+            <div class="message-inputs" id="messageInputs">
+                <div class="input-group">
+                    <label for="chatId">Chat ID (номер телефона):</label>
+                    <input type="text" id="chatId" placeholder="77771234567@c.us">
+                </div>
+                <div class="input-group">
+                    <label for="messageText">Сообщение:</label>
+                    <input type="text" id="messageText" placeholder="Введите текст сообщения">
+                </div>
+                <button class="method-btn btn-send-message" onclick="sendMessage()" style="width: 100%;">
+                    Отправить сообщение
+                </button>
+            </div>
+
+            <div class="message-inputs" id="fileInputs">
+                <div class="input-group">
+                    <label for="fileChatId">Chat ID (номер телефона):</label>
+                    <input type="text" id="fileChatId" placeholder="77771234567@c.us">
+                </div>
+                <div class="input-group">
+                    <label for="fileUrl">URL файла:</label>
+                    <input type="text" id="fileUrl" placeholder="https://example.com/image.png">
+                </div>
+                <div class="input-group">
+                    <label for="fileName">Имя файла (опционально):</label>
+                    <input type="text" id="fileName" placeholder="image.png">
+                </div>
+                <button class="method-btn btn-send-file" onclick="sendFileByUrl()" style="width: 100%;">
+                    Отправить файл
+                </button>
+            </div>
+        </div>
+
+        <div class="response-section">
+            <h2>📋 Ответ API <span id="statusBadge"></span></h2>
+            <div class="response-box" id="responseBox" readonly></div>
+        </div>
+
+        <div class="footer">
+            <p>GREEN API © 2025 | Разработано для тестового задания</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://7105.api.greenapi.com';
+
+        function getCredentials() {
+            const idInstance = document.getElementById('idInstance').value.trim();
+            const apiToken = document.getElementById('apiToken').value.trim();
+            
+            if (!idInstance || !apiToken) {
+                showResponse({
+                    error: 'Пожалуйста, заполните idInstance и ApiTokenInstance'
+                }, false);
+                return null;
+            }
+            
+            return { idInstance, apiToken };
+        }
+
+        function showResponse(data, success = true) {
+            const responseBox = document.getElementById('responseBox');
+            const statusBadge = document.getElementById('statusBadge');
+            
+            responseBox.textContent = JSON.stringify(data, null, 2);
+            
+            if (success) {
+                statusBadge.innerHTML = '<span class="status-badge status-success">✓ Успешно</span>';
+            } else {
+                statusBadge.innerHTML = '<span class="status-badge status-error">✗ Ошибка</span>';
+            }
+        }
+
+        function showLoading(button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="loading"></span>';
+            button.disabled = true;
+            return originalText;
+        }
+
+        function hideLoading(button, originalText) {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+
+        async function getSettings() {
+            const credentials = getCredentials();
+            if (!credentials) return;
+
+            const button = event.target;
+            const originalText = showLoading(button);
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/waInstance${credentials.idInstance}/getSettings/${credentials.apiToken}`,
+                    { method: 'GET' }
+                );
+                
+                const data = await response.json();
+                showResponse(data, response.ok);
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        async function getStateInstance() {
+            const credentials = getCredentials();
+            if (!credentials) return;
+
+            const button = event.target;
+            const originalText = showLoading(button);
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/waInstance${credentials.idInstance}/getStateInstance/${credentials.apiToken}`,
+                    { method: 'GET' }
+                );
+                
+                const data = await response.json();
+                showResponse(data, response.ok);
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        function toggleMessageInput() {
+            const messageInputs = document.getElementById('messageInputs');
+            const fileInputs = document.getElementById('fileInputs');
+            fileInputs.classList.remove('active');
+            messageInputs.classList.toggle('active');
+        }
+
+        function toggleFileInput() {
+            const messageInputs = document.getElementById('messageInputs');
+            const fileInputs = document.getElementById('fileInputs');
+            messageInputs.classList.remove('active');
+            fileInputs.classList.toggle('active');
+        }
+
+        async function sendMessage() {
+            const credentials = getCredentials();
+            if (!credentials) return;
+
+            const chatId = document.getElementById('chatId').value.trim();
+            const message = document.getElementById('messageText').value.trim();
+
+            if (!chatId || !message) {
+                showResponse({ error: 'Заполните Chat ID и текст сообщения' }, false);
+                return;
+            }
+
+            const button = event.target;
+            const originalText = showLoading(button);
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/waInstance${credentials.idInstance}/sendMessage/${credentials.apiToken}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chatId: chatId,
+                            message: message
+                        })
+                    }
+                );
+                
+                const data = await response.json();
+                showResponse(data, response.ok);
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        async function sendFileByUrl() {
+            const credentials = getCredentials();
+            if (!credentials) return;
+
+            const chatId = document.getElementById('fileChatId').value.trim();
+            const urlFile = document.getElementById('fileUrl').value.trim();
+            const fileName = document.getElementById('fileName').value.trim();
+
+            if (!chatId || !urlFile) {
+                showResponse({ error: 'Заполните Chat ID и URL файла' }, false);
+                return;
+            }
+
+            const button = event.target;
+            const originalText = showLoading(button);
+
+            try {
+                const requestBody = {
+                    chatId: chatId,
+                    urlFile: urlFile
+                };
+
+                if (fileName) {
+                    requestBody.fileName = fileName;
+                }
+
+                const response = await fetch(
+                    `${API_URL}/waInstance${credentials.idInstance}/sendFileByUrl/${credentials.apiToken}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    }
+                );
+                
+                const data = await response.json();
+                showResponse(data, response.ok);
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+    </script>
+</body>
+</html>
